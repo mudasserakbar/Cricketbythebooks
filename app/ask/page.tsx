@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import { ChatInterface } from '@/components/ChatInterface'
+import { CricketQuiz, isQuizVerified } from '@/components/CricketQuiz'
 import { createClientSupabaseClient } from '@/lib/supabase/client'
 import { getOrCreateSession } from '@/lib/session'
 import type { Organization } from '@/lib/types'
@@ -15,6 +16,12 @@ function AskContent() {
   const [org, setOrg] = useState<Organization | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [verified, setVerified] = useState(false)
+
+  // Check if already verified on mount
+  useEffect(() => {
+    setVerified(isQuizVerified())
+  }, [])
 
   useEffect(() => {
     if (!orgSlug) return
@@ -115,9 +122,13 @@ function AskContent() {
         </div>
       </header>
 
-      {/* Chat area */}
+      {/* Quiz gate or Chat */}
       <div className="flex-1 overflow-hidden max-w-3xl mx-auto w-full">
-        <ChatInterface org={org} sessionId={sessionId!} />
+        {verified ? (
+          <ChatInterface org={org} sessionId={sessionId!} />
+        ) : (
+          <CricketQuiz onVerified={() => setVerified(true)} />
+        )}
       </div>
     </div>
   )

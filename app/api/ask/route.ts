@@ -8,6 +8,15 @@ import { getGeoFromHeaders } from '@/lib/geo'
 import { askSchema } from '@/lib/validations'
 
 export async function POST(req: NextRequest) {
+  // Verify cricket quiz token
+  const verificationToken = req.headers.get('x-cricket-verified')
+  if (!verificationToken) {
+    return NextResponse.json(
+      { error: 'Please complete the cricket quiz first.' },
+      { status: 403 }
+    )
+  }
+
   // Rate limit: 20 questions per hour per IP
   const ip = getRateLimitKey(req)
   const limit = rateLimit(`ask:${ip}`, 20, 60 * 60 * 1000)

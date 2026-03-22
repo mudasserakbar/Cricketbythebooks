@@ -49,9 +49,13 @@ export function ChatInterface({
     setMessages((prev) => [...prev, userMsg])
 
     try {
+      const verificationToken = localStorage.getItem('cricket_verified') || ''
       const res = await fetch('/api/ask', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cricket-verified': verificationToken,
+        },
         body: JSON.stringify({
           question,
           orgId: org.id,
