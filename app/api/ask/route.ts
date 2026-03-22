@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { answerQuestion } from '@/lib/ai/rag'
+import { classifyQuestion } from '@/lib/ai/classify'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { logEvent } from '@/lib/analytics'
 import { rateLimit, getRateLimitKey } from '@/lib/rate-limit'
+import { getGeoFromHeaders } from '@/lib/geo'
 import { askSchema } from '@/lib/validations'
 
 export async function POST(req: NextRequest) {
@@ -28,6 +30,9 @@ export async function POST(req: NextRequest) {
   const { question, orgId, orgName, sessionId, conversationHistory } =
     parsed.data
 
+  // Get visitor geolocation from headers
+  const geo = getGeoFromHeaders(req.headers)
+
   try {
     const result = await answerQuestion(
       question,
@@ -37,30 +42,56 @@ export async function POST(req: NextRequest) {
     )
     const supabase = createAdminSupabaseClient()
 
-    // Store messages
+    // Store user message with geo
     if (sessionId) {
       await supabase.from('messages').insert({
         session_id: sessionId,
         org_id: orgId,
         role: 'user',
         content: question,
+        visitor_city: geo.city,
+        visitor_province: geo.province,
+        visitor_country: geo.country,
       })
-      await supabase.from('messages').insert({
-        session_id: sessionId,
-        org_id: orgId,
-        role: 'assistant',
-        content: result.answer,
-        answer_found: result.found,
-        cited_chunks: result.citations.map((c) => c.chunkId),
+
+      // Classify question in background (don't block response)
+      classifyQuestion(question, result.answer, orgName).then(
+        async (classification) => {
+          await supabase.from('messages').insert({
+            session_id: sessionId,
+            org_id: orgId,
+            role: 'assistant',
+            content: result.answer,
+            answer_found: result.found,
+            cited_chunks: result.citations.map((c) => c.chunkId),
+            classification: classification.classification,
+            topic_tags: classification.topics,
+          })
+        }
+      ).catch(async () => {
+        // Fallback: store without classification
+        await supabase.from('messages').insert({
+          session_id: sessionId,
+          org_id: orgId,
+          role: 'assistant',
+          content: result.answer,
+          answer_found: result.found,
+          cited_chunks: result.citations.map((c) => c.chunkId),
+        })
       })
     }
 
-    // Log analytics
+    // Log analytics with geo
     await logEvent(
       result.found ? 'answer_found' : 'answer_not_found',
       orgId,
       sessionId,
-      { question_length: question.length }
+      {
+        question_length: question.length,
+        city: geo.city,
+        province: geo.province,
+        country: geo.country,
+      }
     )
 
     return NextResponse.json(result)

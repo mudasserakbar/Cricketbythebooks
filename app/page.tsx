@@ -1,9 +1,12 @@
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { OrgSelector } from '@/components/OrgSelector'
+import { TopQuestions } from '@/components/TopQuestions'
+import { PublicStats } from '@/components/PublicStats'
+import { PageTracker } from '@/components/PageTracker'
 import { FALLBACK_ORGS } from '@/lib/fallback-orgs'
 import type { Organization } from '@/lib/types'
 
-export const revalidate = 60 // ISR: revalidate every 60 seconds
+export const revalidate = 60
 
 export default async function HomePage() {
   let orgs: Organization[] = []
@@ -26,6 +29,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <PageTracker page="/" />
+
       {/* Header */}
       <header className="border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -37,12 +42,20 @@ export default async function HomePage() {
               Cricket Policy Assistant
             </span>
           </div>
-          <a
-            href="/contact"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            Contact
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="/stats"
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Stats
+            </a>
+            <a
+              href="/contact"
+              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              Contact
+            </a>
+          </div>
         </div>
       </header>
 
@@ -62,6 +75,9 @@ export default async function HomePage() {
         {/* Org selector */}
         <OrgSelector orgs={orgs} />
 
+        {/* Top questions */}
+        <TopQuestions />
+
         {/* Footer info */}
         <div className="mt-16 text-center">
           <p className="text-xs text-gray-400 max-w-lg mx-auto">
@@ -69,6 +85,7 @@ export default async function HomePage() {
             questions are anonymous. Answers are based on official documents only
             and do not constitute legal advice.
           </p>
+          <PublicStats />
         </div>
       </main>
     </div>
