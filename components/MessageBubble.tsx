@@ -18,7 +18,7 @@ export function MessageBubble({
   if (message.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-2xl rounded-tr-sm leading-relaxed">
+        <div className="max-w-[85%] gradient-emerald text-white text-sm px-4 py-3 rounded-2xl rounded-tr-md leading-relaxed shadow-sm">
           {message.content}
         </div>
       </div>
@@ -26,8 +26,8 @@ export function MessageBubble({
   }
 
   return (
-    <div className="flex flex-col gap-2 max-w-[90%]">
-      <div className="bg-gray-50 text-gray-800 text-sm px-4 py-3 rounded-2xl rounded-tl-sm leading-relaxed whitespace-pre-wrap">
+    <div className="flex flex-col gap-2.5 max-w-[90%]">
+      <div className="bg-white text-gray-800 text-sm px-4 py-3.5 rounded-2xl rounded-tl-md leading-relaxed whitespace-pre-wrap shadow-soft border border-gray-100/80">
         {message.content}
       </div>
       {message.found && message.citations && message.citations.length > 0 && (

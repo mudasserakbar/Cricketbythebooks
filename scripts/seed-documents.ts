@@ -393,20 +393,30 @@ function extractSectionRef(text: string): string | undefined {
 
 async function embedBatch(texts: string[]): Promise<number[][]> {
   if (VOYAGE_KEY) {
-    const res = await fetch('https://api.voyageai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${VOYAGE_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ model: 'voyage-3', input: texts }),
-    })
-    if (!res.ok) {
+    // Retry with backoff for rate limits (free tier: 3 RPM)
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const res = await fetch('https://api.voyageai.com/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${VOYAGE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model: 'voyage-3', input: texts }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        return data.data.map((d: any) => d.embedding)
+      }
+      if (res.status === 429) {
+        const wait = 25 * (attempt + 1)
+        console.log(`  Rate limited, waiting ${wait}s (attempt ${attempt + 1}/5)...`)
+        await new Promise((r) => setTimeout(r, wait * 1000))
+        continue
+      }
       const err = await res.text()
       throw new Error(`Voyage API error: ${res.status} ${err}`)
     }
-    const data = await res.json()
-    return data.data.map((d: any) => d.embedding)
+    throw new Error('Voyage API: exceeded retry attempts')
   }
 
   const res = await fetch('https://api.openai.com/v1/embeddings', {

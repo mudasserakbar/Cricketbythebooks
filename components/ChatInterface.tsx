@@ -20,11 +20,16 @@ export function ChatInterface({
   const [loading, setLoading] = useState(false)
   const [showProfileBanner, setShowProfileBanner] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const questionCount = useRef(0)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
   const clearChat = () => {
     setMessages([])
@@ -80,39 +85,30 @@ export function ChatInterface({
         toast.error(data.error)
         setMessages((prev) => [
           ...prev,
+          { id: crypto.randomUUID(), role: 'assistant', content: data.error, found: false },
+        ])
+      } else {
+        setMessages((prev) => [
+          ...prev,
           {
             id: crypto.randomUUID(),
             role: 'assistant',
-            content: data.error,
-            found: false,
+            content: data.answer,
+            found: data.found,
+            citations: data.citations,
           },
         ])
-      } else {
-        const assistantMsg: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: data.answer,
-          found: data.found,
-          citations: data.citations,
-        }
-        setMessages((prev) => [...prev, assistantMsg])
       }
 
-      // Show soft profile banner after 1st question
       questionCount.current += 1
       if (questionCount.current === 1) {
         setTimeout(() => setShowProfileBanner(true), 1500)
       }
     } catch {
-      toast.error('Connection error. Please check your internet and try again.')
+      toast.error('Connection error. Please try again.')
       setMessages((prev) => [
         ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again.',
-          found: false,
-        },
+        { id: crypto.randomUUID(), role: 'assistant', content: 'Sorry, something went wrong.', found: false },
       ])
     } finally {
       setLoading(false)
@@ -120,18 +116,20 @@ export function ChatInterface({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-b from-gray-50/50 to-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <span className="text-xs font-medium bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full">
-          {org.name}
-        </span>
+      <div className="glass sticky top-0 z-10 flex items-center justify-between px-5 py-3.5 border-b border-gray-100/50">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3.5 py-1.5 rounded-full shadow-sm">
+            {org.name}
+          </span>
+        </div>
         {messages.length > 0 && (
           <button
             onClick={clearChat}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded-md hover:bg-gray-100 transition-all"
           >
-            Clear chat
+            Clear
           </button>
         )}
       </div>
@@ -140,10 +138,12 @@ export function ChatInterface({
       <DocumentCoverage orgId={org.id} />
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
         {messages.length === 0 && <WelcomeState orgName={org.name} onSuggest={setInput} />}
-        {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} orgName={org.name} sessionId={sessionId} />
+        {messages.map((msg, i) => (
+          <div key={msg.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+            <MessageBubble message={msg} orgName={org.name} sessionId={sessionId} />
+          </div>
         ))}
         {loading && <TypingIndicator />}
         <div ref={messagesEndRef} />
@@ -151,40 +151,43 @@ export function ChatInterface({
 
       {/* Soft profile banner */}
       {showProfileBanner && (
-        <SoftProfileBanner
-          sessionId={sessionId}
-          onDismiss={() => {
-            setShowProfileBanner(false)
-            track('soft_profile_dismissed', org.id, sessionId)
-          }}
-        />
+        <div className="animate-slide-up">
+          <SoftProfileBanner
+            sessionId={sessionId}
+            onDismiss={() => {
+              setShowProfileBanner(false)
+              track('soft_profile_dismissed', org.id, sessionId)
+            }}
+          />
+        </div>
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-gray-100">
-        <div className="flex gap-2">
-          <input
-            className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-emerald-400 transition-colors"
-            placeholder={`Ask about ${org.name} policy...`}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === 'Enter' && !e.shiftKey && sendMessage()
-            }
-          />
+      <div className="glass border-t border-gray-100/50 px-5 py-4">
+        <div className="flex gap-3 items-center">
+          <div className="flex-1 relative">
+            <input
+              ref={inputRef}
+              className="w-full text-sm bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all placeholder:text-gray-400"
+              placeholder={`Ask about ${org.name} policy...`}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+            />
+          </div>
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
             aria-label="Send message"
-            className="w-9 h-9 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+            className="w-11 h-11 gradient-emerald hover:opacity-90 disabled:opacity-30 rounded-xl flex items-center justify-center transition-all shadow-sm hover:shadow-md flex-shrink-0 active:scale-95"
           >
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-2 text-center">
-          Answers are based on official documents only · Not legal advice
+        <p className="text-[11px] text-gray-400 mt-2.5 text-center">
+          Answers cite official documents only &middot; Not legal advice
         </p>
       </div>
     </div>
@@ -199,30 +202,38 @@ function WelcomeState({
   onSuggest: (q: string) => void
 }) {
   const suggestions = [
-    'How do I register as a player?',
-    'What are the eligibility requirements?',
-    'How does the disciplinary process work?',
-    'Can I play for two teams in the same season?',
+    { icon: '📋', text: 'How do I register as a player?' },
+    { icon: '✅', text: 'What are the eligibility requirements?' },
+    { icon: '⚖️', text: 'How does the disciplinary process work?' },
+    { icon: '🏏', text: 'Can I play for two teams in the same season?' },
   ]
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-4 py-8 gap-6">
+    <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 gap-8 animate-fade-in">
+      {/* Logo */}
+      <div className="w-16 h-16 gradient-emerald rounded-2xl flex items-center justify-center shadow-glow">
+        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 4.5c0 5 3 7.5 3 7.5s-3 2.5-3 7.5" strokeLinecap="round" />
+          <path d="M16 4.5c0 5-3 7.5-3 7.5s3 2.5 3 7.5" strokeLinecap="round" />
+        </svg>
+      </div>
       <div>
-        <p className="text-base font-medium text-gray-800 mb-1">
-          Ask anything about {orgName} policy
+        <p className="text-lg font-semibold text-gray-900 mb-2">
+          Ask anything about {orgName}
         </p>
-        <p className="text-sm text-gray-500">
-          I&apos;ll find the answer in the official documents and show you
-          exactly where it came from.
+        <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
+          I'll find the answer in the official documents and cite exactly where it came from.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-2 w-full max-w-sm">
+      <div className="grid grid-cols-1 gap-2.5 w-full max-w-sm">
         {suggestions.map((s) => (
           <button
-            key={s}
-            onClick={() => onSuggest(s)}
-            className="text-left text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors border border-gray-100"
+            key={s.text}
+            onClick={() => onSuggest(s.text)}
+            className="flex items-center gap-3 text-left text-sm text-gray-600 bg-white hover:bg-emerald-50 px-4 py-3 rounded-xl transition-all border border-gray-100 hover:border-emerald-200 shadow-soft hover:shadow-md group"
           >
-            {s}
+            <span className="text-base">{s.icon}</span>
+            <span className="group-hover:text-emerald-700 transition-colors">{s.text}</span>
           </button>
         ))}
       </div>
@@ -232,11 +243,11 @@ function WelcomeState({
 
 function TypingIndicator() {
   return (
-    <div className="flex gap-1 px-3 py-3 bg-gray-50 rounded-2xl rounded-tl-sm w-fit">
+    <div className="flex gap-1.5 px-4 py-3.5 bg-white/80 backdrop-blur-sm rounded-2xl rounded-tl-md w-fit shadow-soft border border-gray-100/50 animate-scale-in">
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+          className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
           style={{ animationDelay: `${i * 0.15}s` }}
         />
       ))}

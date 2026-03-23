@@ -52,7 +52,6 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
 
       if (data.verified) {
         setStatus('correct')
-        // Store verification in localStorage
         localStorage.setItem('cricket_verified', data.verificationToken)
         localStorage.setItem('cricket_verified_until', data.expiresAt.toString())
         setTimeout(() => onVerified(data.verificationToken), 800)
@@ -63,10 +62,7 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
         setStatus('wrong')
         setErrorMsg('Not quite right! Try again.')
         setSelected(null)
-        setTimeout(() => {
-          setStatus('ready')
-          setErrorMsg('')
-        }, 1500)
+        setTimeout(() => { setStatus('ready'); setErrorMsg('') }, 1500)
       }
     } catch {
       setErrorMsg('Something went wrong. Please try again.')
@@ -77,18 +73,18 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
   if (status === 'loading' || !question) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-4 py-16">
-        <div className="w-8 h-8 border-2 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
+        <div className="w-10 h-10 border-2 border-emerald-200 border-t-emerald-600 rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-4 py-12">
+    <div className="flex flex-col items-center justify-center h-full px-4 py-12 animate-fade-in">
       <div className="w-full max-w-md">
         {/* Cricket ball icon */}
-        <div className="flex justify-center mb-4">
-          <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
-            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-full flex items-center justify-center shadow-lg">
+            <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <circle cx="12" cy="12" r="10" />
               <path d="M8 4.5c0 5 3 7.5 3 7.5s-3 2.5-3 7.5" strokeLinecap="round" />
               <path d="M16 4.5c0 5-3 7.5-3 7.5s3 2.5 3 7.5" strokeLinecap="round" />
@@ -96,32 +92,32 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
           </div>
         </div>
 
-        <h2 className="text-lg font-semibold text-gray-900 text-center mb-1">
+        <h2 className="text-xl font-bold text-gray-900 text-center mb-1.5 tracking-tight">
           Quick cricket check
         </h2>
-        <p className="text-sm text-gray-500 text-center mb-6">
-          Answer one question to get started. Easy if you know cricket!
+        <p className="text-sm text-gray-500 text-center mb-8">
+          One question to get started. Easy if you know cricket!
         </p>
 
-        {/* Question */}
-        <div className="bg-gray-50 border border-gray-100 rounded-xl p-5 mb-4">
-          <p className="text-sm font-medium text-gray-800 mb-4">
+        {/* Question card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-soft mb-5">
+          <p className="text-sm font-semibold text-gray-800 mb-5">
             {question.question}
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {question.options.map((option, i) => (
               <button
                 key={i}
                 onClick={() => status === 'ready' && setSelected(i)}
                 disabled={status !== 'ready'}
-                className={`w-full text-left text-sm px-4 py-2.5 rounded-lg border transition-all ${
+                className={`w-full text-left text-sm px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
                   selected === i
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-200 hover:bg-emerald-50/50'
-                } ${status === 'correct' && selected === i ? 'bg-emerald-100 border-emerald-400' : ''}
+                    ? 'bg-emerald-50 border-emerald-400 text-emerald-800 shadow-sm'
+                    : 'bg-white border-gray-100 text-gray-600 hover:border-emerald-200 hover:bg-emerald-50/30'
+                } ${status === 'correct' && selected === i ? 'bg-emerald-100 border-emerald-500' : ''}
                   ${status === 'wrong' && selected === i ? 'bg-red-50 border-red-300 text-red-700' : ''}`}
               >
-                <span className="font-medium text-xs text-gray-400 mr-2">
+                <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-md bg-gray-100 text-gray-500 mr-3">
                   {String.fromCharCode(65 + i)}
                 </span>
                 {option}
@@ -130,35 +126,37 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
           </div>
         </div>
 
-        {/* Error / feedback */}
+        {/* Error */}
         {errorMsg && (
-          <p className={`text-xs text-center mb-3 ${status === 'wrong' ? 'text-red-600' : 'text-amber-600'}`}>
+          <p className={`text-xs text-center mb-4 font-medium ${status === 'wrong' ? 'text-red-500' : 'text-amber-600'}`}>
             {errorMsg}
           </p>
         )}
 
-        {/* Success message */}
+        {/* Success */}
         {status === 'correct' && (
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="text-sm text-emerald-700 font-medium">Howzat! You're in.</span>
+          <div className="flex items-center justify-center gap-2 mb-4 animate-scale-in">
+            <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-sm text-emerald-700 font-semibold">Howzat! You're in.</span>
           </div>
         )}
 
-        {/* Submit button */}
+        {/* Submit */}
         {status !== 'correct' && (
           <button
             onClick={handleSubmit}
             disabled={selected === null || status === 'checking' || status === 'wrong'}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="w-full gradient-emerald hover:opacity-90 disabled:opacity-30 text-white text-sm font-semibold py-3 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
           >
             {status === 'checking' ? 'Checking...' : status === 'wrong' ? 'Oops!' : 'Verify'}
           </button>
         )}
 
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-[11px] text-gray-400 text-center mt-5">
           This keeps bots out and cricket people in.
         </p>
       </div>
@@ -166,7 +164,6 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
   )
 }
 
-// Helper: check if user is already verified
 export function isQuizVerified(): boolean {
   if (typeof window === 'undefined') return false
   const expiresAt = localStorage.getItem('cricket_verified_until')

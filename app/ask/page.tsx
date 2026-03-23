@@ -18,14 +18,12 @@ function AskContent() {
   const [loading, setLoading] = useState(true)
   const [verified, setVerified] = useState(false)
 
-  // Check if already verified on mount
   useEffect(() => {
     setVerified(isQuizVerified())
   }, [])
 
   useEffect(() => {
     if (!orgSlug) return
-
     const init = async () => {
       try {
         const supabase = createClientSupabaseClient()
@@ -34,7 +32,6 @@ function AskContent() {
           .select('*')
           .eq('slug', orgSlug)
           .single()
-
         if (data) {
           setOrg(data as Organization)
           const sid = await getOrCreateSession(data.id)
@@ -42,11 +39,7 @@ function AskContent() {
           setLoading(false)
           return
         }
-      } catch {
-        // Supabase not configured — use fallback
-      }
-
-      // Fallback to hardcoded org data
+      } catch {}
       const fallback = FALLBACK_ORGS_BY_SLUG[orgSlug]
       if (fallback) {
         setOrg(fallback)
@@ -54,16 +47,15 @@ function AskContent() {
       }
       setLoading(false)
     }
-
     init()
   }, [orgSlug])
 
   if (!orgSlug) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center gradient-hero">
+        <div className="text-center animate-fade-in">
           <p className="text-gray-500 mb-4">No organization selected.</p>
-          <a href="/" className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+          <a href="/" className="text-emerald-600 hover:text-emerald-700 text-sm font-semibold">
             Select an organization
           </a>
         </div>
@@ -73,14 +65,10 @@ function AskContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex gap-1">
+      <div className="min-h-screen flex items-center justify-center gradient-hero">
+        <div className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
+            <div key={i} className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
         </div>
       </div>
@@ -89,10 +77,10 @@ function AskContent() {
 
   if (!org) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center gradient-hero">
+        <div className="text-center animate-fade-in">
           <p className="text-gray-500 mb-4">Organization not found.</p>
-          <a href="/" className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+          <a href="/" className="text-emerald-600 hover:text-emerald-700 text-sm font-semibold">
             Select an organization
           </a>
         </div>
@@ -103,20 +91,26 @@ function AskContent() {
   return (
     <div className="h-screen flex flex-col bg-white">
       {/* Top bar */}
-      <header className="border-b border-gray-100 flex-shrink-0">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <a href="/" className="text-gray-400 hover:text-gray-600 transition-colors">
+      <header className="glass sticky top-0 z-50 border-b border-gray-100/50 flex-shrink-0">
+        <div className="max-w-3xl mx-auto px-5 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a href="/" className="text-gray-400 hover:text-emerald-600 transition-colors p-1 rounded-lg hover:bg-emerald-50">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </a>
-            <div className="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">CP</span>
+            <div className="w-8 h-8 gradient-emerald rounded-xl flex items-center justify-center shadow-sm">
+              <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 4.5c0 5 3 7.5 3 7.5s-3 2.5-3 7.5" strokeLinecap="round" />
+                <path d="M16 4.5c0 5-3 7.5-3 7.5s3 2.5 3 7.5" strokeLinecap="round" />
+              </svg>
             </div>
-            <span className="font-medium text-gray-800 text-sm">Cricket Policy Assistant</span>
+            <span className="font-semibold text-gray-900 text-sm tracking-tight">
+              Cricket Policy Assistant
+            </span>
           </div>
-          <a href="/contact" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+          <a href="/contact" className="text-xs text-gray-500 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-emerald-50/80 transition-all">
             Need help?
           </a>
         </div>
@@ -138,14 +132,10 @@ export default function AskPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="flex gap-1">
+        <div className="min-h-screen flex items-center justify-center gradient-hero">
+          <div className="flex gap-1.5">
             {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
+              <div key={i} className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </div>
         </div>

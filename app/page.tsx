@@ -20,7 +20,7 @@ export default async function HomePage() {
       .order('name', { ascending: true })
     orgs = (data as Organization[]) || []
   } catch {
-    // Supabase not configured — use fallback seed data
+    // Supabase not configured
   }
 
   if (orgs.length === 0) {
@@ -28,30 +28,39 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen gradient-hero">
       <PageTracker page="/" />
 
       {/* Header */}
-      <header className="border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">CP</span>
+      <header className="sticky top-0 z-50 glass border-b border-gray-100/50">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 gradient-emerald rounded-xl flex items-center justify-center shadow-sm">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 4.5c0 5 3 7.5 3 7.5s-3 2.5-3 7.5" strokeLinecap="round" />
+                <path d="M16 4.5c0 5-3 7.5-3 7.5s3 2.5 3 7.5" strokeLinecap="round" />
+              </svg>
             </div>
-            <span className="font-medium text-gray-800">
-              Cricket Policy Assistant
-            </span>
+            <div>
+              <span className="font-semibold text-gray-900 tracking-tight">
+                Cricket Policy Assistant
+              </span>
+              <span className="hidden sm:inline text-xs text-gray-400 ml-2 font-normal">
+                by the community
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
             <a
               href="/stats"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-sm text-gray-500 hover:text-emerald-600 px-3 py-2 rounded-lg hover:bg-emerald-50/80 transition-all"
             >
               Stats
             </a>
             <a
               href="/contact"
-              className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-sm text-gray-500 hover:text-emerald-600 px-3 py-2 rounded-lg hover:bg-emerald-50/80 transition-all"
             >
               Contact
             </a>
@@ -60,31 +69,40 @@ export default async function HomePage() {
       </header>
 
       {/* Hero */}
-      <main className="max-w-4xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-3">
-            Get answers to your cricket policy questions
+      <main className="max-w-5xl mx-auto px-6">
+        <div className="pt-20 pb-16 text-center animate-fade-in">
+          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-medium px-4 py-1.5 rounded-full mb-6">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            Free &middot; No login required &middot; Anonymous
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight leading-tight">
+            Get answers to your<br />
+            <span className="text-gradient">cricket policy questions</span>
           </h1>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            Select your organization below and ask any question about
-            registration, eligibility, disciplinary rules, or playing
-            regulations. Answers come directly from official policy documents.
+          <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
+            Select your organization and ask any question about rules,
+            registration, eligibility, or disciplinary policies.
+            Every answer cites the official source document.
           </p>
         </div>
 
         {/* Org selector */}
-        <OrgSelector orgs={orgs} />
+        <div className="animate-slide-up">
+          <OrgSelector orgs={orgs} />
+        </div>
 
         {/* Top questions */}
         <TopQuestions />
 
-        {/* Footer info */}
-        <div className="mt-16 text-center">
-          <p className="text-xs text-gray-400 max-w-lg mx-auto">
-            This is a free, community-run tool. No login required. Your
-            questions are anonymous. Answers are based on official documents only
-            and do not constitute legal advice.
-          </p>
+        {/* Footer */}
+        <div className="mt-20 pb-12 text-center">
+          <div className="inline-flex items-center gap-4 text-xs text-gray-400">
+            <span>Community-run</span>
+            <span className="w-1 h-1 bg-gray-300 rounded-full" />
+            <span>Document-grounded</span>
+            <span className="w-1 h-1 bg-gray-300 rounded-full" />
+            <span>Not legal advice</span>
+          </div>
           <PublicStats />
         </div>
       </main>
