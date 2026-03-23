@@ -104,10 +104,10 @@ export async function POST(req: NextRequest) {
     )
 
     return NextResponse.json(result)
-  } catch (err) {
-    console.error('Ask error:', err)
+  } catch (err: any) {
+    console.error('Ask error:', err?.message || err)
     return NextResponse.json(
-      { error: 'Failed to generate answer' },
+      { error: 'Failed to generate answer', debug: err?.message || String(err) },
       { status: 500 }
     )
   }
