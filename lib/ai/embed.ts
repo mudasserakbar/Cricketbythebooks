@@ -1,9 +1,10 @@
 // Voyage AI embeddings (voyage-3, 1024 dims)
 // Must match the model used in the seed script
 
-export async function embedText(text: string): Promise<number[]> {
+export async function embedText(text: string): Promise<string> {
   const embeddings = await embedTexts([text])
-  return embeddings[0]
+  // Return as string format for pgvector RPC compatibility
+  return '[' + embeddings[0].join(',') + ']'
 }
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
