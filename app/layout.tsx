@@ -7,7 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Cricket Policy Assistant',
+  title: 'Cricket by the Books',
   description:
     'Get answers to your cricket policy questions. A free, community-run tool for the Canadian cricket community.',
 }

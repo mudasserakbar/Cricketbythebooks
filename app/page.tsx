@@ -44,10 +44,10 @@ export default async function HomePage() {
             </div>
             <div>
               <span className="font-semibold text-gray-900 tracking-tight">
-                Cricket Policy Assistant
+                Cricket by the Books
               </span>
               <span className="hidden sm:inline text-xs text-gray-400 ml-2 font-normal">
-                by the community
+                for the community
               </span>
             </div>
           </div>

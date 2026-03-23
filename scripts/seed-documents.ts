@@ -633,7 +633,7 @@ async function seedOrg(config: OrgConfig) {
 async function main() {
   const targetSlug = process.argv[2] // Optional: seed specific org
 
-  console.log('Cricket Policy Assistant — Document Seeder')
+  console.log('Cricket by the Books — Document Seeder')
   console.log('='.repeat(60))
 
   const configs = targetSlug

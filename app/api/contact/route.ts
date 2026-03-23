@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
       await getResend().emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@cricketpolicyhelp.ca',
         to: userEmail,
-        subject: 'We received your request — Cricket Policy Assistant',
+        subject: 'We received your request — Cricket by the Books',
         html: `
           <p>Hi,</p>
           <p>Our volunteer team has received your request and will get back to you within 48–72 hours for disciplinary/eligibility matters, or sooner for registration and general questions.</p>
           <p>This is a not-for-profit community service. We appreciate your patience.</p>
-          <p>— Cricket Policy Assistant volunteer team</p>
+          <p>— Cricket by the Books volunteer team</p>
         `,
       })
     }

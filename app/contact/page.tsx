@@ -29,7 +29,7 @@ export default function ContactPage() {
               <span className="text-white text-xs font-bold">CP</span>
             </div>
             <span className="font-medium text-gray-800 text-sm">
-              Cricket Policy Assistant
+              Cricket by the Books
             </span>
           </div>
         </div>

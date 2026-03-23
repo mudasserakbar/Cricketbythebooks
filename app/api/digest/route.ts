@@ -66,17 +66,17 @@ export async function GET(req: NextRequest) {
       await getResend().emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@cricketpolicyhelp.ca',
         to: org.contact_email,
-        subject: `Weekly digest — ${org.name} | Cricket Policy Assistant`,
+        subject: `Weekly digest — ${org.name} | Cricket by the Books`,
         html: `
           <h2>${org.name} — Weekly Digest</h2>
-          <p>Here's your Cricket Policy Assistant summary for the past 7 days:</p>
+          <p>Here's your Cricket by the Books summary for the past 7 days:</p>
           <ul>
             <li><strong>${totalQuestions || 0}</strong> questions asked</li>
             <li><strong>${answerRate}%</strong> answer rate</li>
             <li><strong>${supportCount || 0}</strong> support requests</li>
           </ul>
           <p>Visit the <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://cricketpolicyhelp.ca'}/admin">admin dashboard</a> for more details.</p>
-          <p>— Cricket Policy Assistant</p>
+          <p>— Cricket by the Books</p>
         `,
       })
 

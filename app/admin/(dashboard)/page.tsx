@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Overview of Cricket Policy Assistant usage
+            Overview of Cricket by the Books usage
           </p>
         </div>
         <select

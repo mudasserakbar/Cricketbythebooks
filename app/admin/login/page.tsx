@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
           </div>
           <h1 className="text-lg font-semibold text-gray-900">Admin Login</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Cricket Policy Assistant
+            Cricket by the Books
           </p>
         </div>
 

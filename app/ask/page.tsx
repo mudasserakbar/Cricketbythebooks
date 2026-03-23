@@ -107,7 +107,7 @@ function AskContent() {
               </svg>
             </div>
             <span className="font-semibold text-gray-900 text-sm tracking-tight">
-              Cricket Policy Assistant
+              Cricket by the Books
             </span>
           </div>
           <a href="/contact" className="text-xs text-gray-500 hover:text-emerald-600 px-3 py-1.5 rounded-lg hover:bg-emerald-50/80 transition-all">

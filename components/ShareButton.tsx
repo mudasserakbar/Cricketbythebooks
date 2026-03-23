@@ -7,7 +7,7 @@ export function ShareButton({ question, answer }: { question: string; answer: st
   const [copied, setCopied] = useState(false)
 
   const share = async () => {
-    const text = `Q: ${question}\n\nA: ${answer}\n\n— Cricket Policy Assistant`
+    const text = `Q: ${question}\n\nA: ${answer}\n\n— Cricket by the Books`
 
     if (navigator.share) {
       try {
