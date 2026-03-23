@@ -22,7 +22,7 @@ export async function answerQuestion(
   const { data: chunks, error } = await supabase.rpc('match_chunks', {
     query_embedding: queryEmbedding,
     match_org_id: orgId,
-    match_threshold: 0.72,
+    match_threshold: 0.3,
     match_count: 6,
   })
 
