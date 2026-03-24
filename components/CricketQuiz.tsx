@@ -141,7 +141,7 @@ export function CricketQuiz({ onVerified }: CricketQuizProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span className="text-sm text-emerald-700 font-semibold">Howzat! You're in.</span>
+            <span className="text-sm text-emerald-700 font-semibold">Howzat! You&apos;re in.</span>
           </div>
         )}
 

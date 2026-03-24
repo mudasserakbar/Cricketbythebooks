@@ -3,8 +3,7 @@ import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { chunkDocument } from '@/lib/ai/chunk'
 import { embedTexts } from '@/lib/ai/embed'
 import { uploadSchema } from '@/lib/validations'
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse')
+const pdfParse = require('pdf-parse') // eslint-disable-line
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46] // %PDF

@@ -205,7 +205,7 @@ const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
     { icon: '📋', text: 'How are provincial teams selected?' },
     { icon: '⚖️', text: 'What is the discipline and complaints process?' },
     { icon: '🛡️', text: 'What does the child safeguarding policy cover?' },
-    { icon: '🤝', text: 'What is Cricket BC\'s conflict of interest policy?' },
+    { icon: '🤝', text: 'What is the conflict of interest policy?' },
   ],
   default: [
     { icon: '📋', text: 'What are the registration requirements?' },
@@ -238,7 +238,7 @@ function WelcomeState({
           Ask anything about {orgName}
         </p>
         <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
-          I'll find the answer in the official documents and cite exactly where it came from.
+          I&apos;ll find the answer in the official documents and cite exactly where it came from.
         </p>
       </div>
       <div className="grid grid-cols-1 gap-2.5 w-full max-w-sm">
