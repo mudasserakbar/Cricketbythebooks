@@ -194,6 +194,27 @@ export function ChatInterface({
   )
 }
 
+const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
+  'Cricket Canada': [
+    { icon: '📜', text: 'What is the Cricket Canada Code of Conduct?' },
+    { icon: '⚖️', text: 'How do I file a discipline complaint?' },
+    { icon: '🏏', text: 'What is the player selection policy for national teams?' },
+    { icon: '🚫', text: 'What counts as disapproved cricket?' },
+  ],
+  'Cricket BC': [
+    { icon: '📋', text: 'How are provincial teams selected?' },
+    { icon: '⚖️', text: 'What is the discipline and complaints process?' },
+    { icon: '🛡️', text: 'What does the child safeguarding policy cover?' },
+    { icon: '🤝', text: 'What is Cricket BC\'s conflict of interest policy?' },
+  ],
+  default: [
+    { icon: '📋', text: 'What are the registration requirements?' },
+    { icon: '⚖️', text: 'How does the disciplinary process work?' },
+    { icon: '📜', text: 'What is the code of conduct?' },
+    { icon: '🏏', text: 'What are the eligibility rules?' },
+  ],
+}
+
 function WelcomeState({
   orgName,
   onSuggest,
@@ -201,12 +222,7 @@ function WelcomeState({
   orgName: string
   onSuggest: (q: string) => void
 }) {
-  const suggestions = [
-    { icon: '📋', text: 'How do I register as a player?' },
-    { icon: '✅', text: 'What are the eligibility requirements?' },
-    { icon: '⚖️', text: 'How does the disciplinary process work?' },
-    { icon: '🏏', text: 'Can I play for two teams in the same season?' },
-  ]
+  const suggestions = ORG_SUGGESTIONS[orgName] || ORG_SUGGESTIONS.default
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 gap-8 animate-fade-in">
       {/* Logo */}

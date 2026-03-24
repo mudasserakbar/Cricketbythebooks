@@ -164,7 +164,7 @@ async function main() {
     console.log(`  ${chunks.length} chunks, embedding...`)
 
     // Embed in batches
-    const batchSize = 15 // smaller batches to stay under TPM limit
+    const batchSize = 3 // very small batches to stay under 10K TPM free tier
     const allRecords: any[] = []
 
     try {
@@ -182,10 +182,10 @@ async function main() {
           embedding: embeddings[j],
         })))
 
-        // Always wait between batches to respect rate limit
+        // Always wait between batches to respect 3 RPM + 10K TPM
         if (i + batchSize < chunks.length) {
-          console.log(`    Waiting 22s for rate limit...`)
-          await new Promise(r => setTimeout(r, 22000))
+          console.log(`    Waiting 25s for rate limit...`)
+          await new Promise(r => setTimeout(r, 25000))
         }
       }
 
@@ -206,8 +206,8 @@ async function main() {
       console.log(`  Done! ${chunks.length} chunks`)
 
       // Wait between documents
-      console.log(`  Waiting 22s before next doc...`)
-      await new Promise(r => setTimeout(r, 22000))
+      console.log(`  Waiting 30s before next doc...`)
+      await new Promise(r => setTimeout(r, 30000))
     } catch (e: any) {
       console.log(`  Embedding failed: ${e.message}`)
       failed++
