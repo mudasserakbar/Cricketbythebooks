@@ -105,9 +105,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result)
   } catch (err: any) {
-    console.error('Ask error:', err?.message || err)
+    const msg = err?.message || String(err)
+    const cause = err?.cause ? String(err.cause) : undefined
+    console.error('Ask error:', msg, cause || '')
     return NextResponse.json(
-      { error: 'Failed to generate answer', debug: err?.message || String(err) },
+      { error: 'Failed to generate answer', debug: msg, cause },
       { status: 500 }
     )
   }
