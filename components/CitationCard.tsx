@@ -12,7 +12,8 @@ export function CitationCard({ citations }: { citations: Citation[] }) {
       {unique.map((c, i) => (
         <div
           key={i}
-          className="inline-flex items-center gap-1.5 bg-emerald-50/80 border border-emerald-100 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-emerald-50"
+          className="inline-flex items-center gap-1.5 bg-emerald-50/80 border border-emerald-100 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-emerald-50 animate-citation-reveal"
+          style={{ animationDelay: `${i * 0.08}s` }}
         >
           <svg
             className="w-3 h-3 text-emerald-500 flex-shrink-0"

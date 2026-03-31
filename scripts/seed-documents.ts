@@ -205,6 +205,69 @@ const ORG_CONFIGS: OrgConfig[] = [
     },
   },
 
+  // ── Cricket Quebec ──────────────────────────────────────────
+  {
+    slug: 'cricket-quebec',
+    name: 'Cricket Quebec',
+    level: 'provincial',
+    province: 'Quebec',
+    sourceDir: path.join(HOME, 'Desktop', 'cricket canada documents', 'cricket quebec'),
+    skipFiles: [
+      '1834-8.pdf',   // ICC Men's ODI Playing Conditions (generic)
+      '1834-9.pdf',   // ICC Men's T20I Playing Conditions (generic)
+      '1834-11.pdf',  // Rules of Cricket (generic)
+      '1834-18.pdf',  // ICC Umpires Code of Conduct (generic)
+      '1834-19.pdf',  // General Advice to Umpires and Scorers (generic)
+    ],
+    catalog: {
+      '1834-213.pdf': {
+        name: 'Cricket Quebec Constitution (March 2025)',
+        type: 'bylaws',
+        version: '2025',
+      },
+      '1834-2.pdf': {
+        name: 'Quebec Cricket Federation Constitution',
+        type: 'bylaws',
+        version: '2024',
+      },
+      '1834-59.pdf': {
+        name: 'Cricket Quebec T20 Playing Conditions',
+        type: 'playing_rules',
+        version: '2025',
+      },
+      '1834-60.pdf': {
+        name: 'Cricket Quebec T30 Playing Conditions',
+        type: 'playing_rules',
+        version: '2025',
+      },
+      '1834-61.pdf': {
+        name: 'Cricket Quebec 40-Over Playing Conditions',
+        type: 'playing_rules',
+        version: '2025',
+      },
+      '1834-32.pdf': {
+        name: 'Junior U-18 Player Registration Form',
+        type: 'registration',
+        version: '2025',
+      },
+      '1834-38.pdf': {
+        name: 'Junior U-19 Player Registration Form',
+        type: 'registration',
+        version: '2025',
+      },
+      '1834-39.pdf': {
+        name: 'Parent/Guardian Consent & Release Form',
+        type: 'registration',
+        version: '2025',
+      },
+      '1834-42.pdf': {
+        name: 'Player Transfer Form',
+        type: 'registration',
+        version: '2025',
+      },
+    },
+  },
+
   // ── Cricket BC ──────────────────────────────────────────────
   {
     slug: 'cricket-bc',
@@ -575,8 +638,8 @@ async function seedOrg(config: OrgConfig) {
       const chunks = chunkText(text)
       console.log(`  Chunks: ${chunks.length}`)
 
-      // Embed in batches
-      const batchSize = 20
+      // Embed in batches (small batches to respect Voyage free tier 3 RPM + 10K TPM)
+      const batchSize = 3
       const chunkRecords: any[] = []
 
       for (let i = 0; i < chunks.length; i += batchSize) {
@@ -600,7 +663,8 @@ async function seedOrg(config: OrgConfig) {
         )
 
         if (i + batchSize < chunks.length) {
-          await new Promise((r) => setTimeout(r, 500))
+          console.log(`  Waiting 25s for rate limit...`)
+          await new Promise((r) => setTimeout(r, 25000))
         }
       }
 
@@ -620,6 +684,8 @@ async function seedOrg(config: OrgConfig) {
       processed++
       totalChunks += chunks.length
       console.log(`  Done! ${chunks.length} chunks`)
+      console.log(`  Waiting 30s before next doc...`)
+      await new Promise((r) => setTimeout(r, 30000))
     } catch (err: any) {
       console.error(`  ERROR: ${err.message}`)
     }

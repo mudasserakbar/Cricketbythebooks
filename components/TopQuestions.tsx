@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRevealOnScroll } from '@/hooks/useRevealOnScroll'
 
 interface TopQuestion {
   question: string
@@ -9,6 +10,7 @@ interface TopQuestion {
 
 export function TopQuestions() {
   const [questions, setQuestions] = useState<TopQuestion[]>([])
+  const ref = useRevealOnScroll<HTMLDivElement>()
 
   useEffect(() => {
     fetch('/api/top-questions?limit=5')
@@ -20,7 +22,7 @@ export function TopQuestions() {
   if (questions.length === 0) return null
 
   return (
-    <div className="mt-12">
+    <div ref={ref} className="mt-12" style={{ opacity: 0 }}>
       <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4 text-center">
         Popular questions
       </h2>

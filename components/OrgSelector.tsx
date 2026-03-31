@@ -3,7 +3,20 @@
 import Link from 'next/link'
 import type { Organization } from '@/lib/types'
 
-const LIVE_ORGS = ['cricket-canada', 'cricket-bc']
+const LIVE_ORGS = ['cricket-canada', 'cricket-bc', 'cricket-quebec']
+
+const PROVINCE_COLORS: Record<string, string> = {
+  'British Columbia': 'bg-blue-400',
+  'Ontario': 'bg-red-400',
+  'Alberta': 'bg-blue-600',
+  'Quebec': 'bg-cyan-500',
+  'Manitoba': 'bg-red-600',
+  'Saskatchewan': 'bg-green-500',
+  'Nova Scotia': 'bg-yellow-500',
+  'New Brunswick': 'bg-yellow-600',
+  'Prince Edward Island': 'bg-orange-400',
+  'Newfoundland and Labrador': 'bg-pink-500',
+}
 
 export function OrgSelector({ orgs }: { orgs: Organization[] }) {
   const national = orgs.filter((o) => o.level === 'national')
@@ -21,8 +34,10 @@ export function OrgSelector({ orgs }: { orgs: Organization[] }) {
             <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent" />
           </div>
           <div className="grid grid-cols-1 gap-3">
-            {national.map((org) => (
-              <OrgCard key={org.id} org={org} live={LIVE_ORGS.includes(org.slug)} featured />
+            {national.map((org, i) => (
+              <div key={org.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.06}s`, animationFillMode: 'both' }}>
+                <OrgCard org={org} live={LIVE_ORGS.includes(org.slug)} featured />
+              </div>
             ))}
           </div>
         </div>
@@ -38,8 +53,10 @@ export function OrgSelector({ orgs }: { orgs: Organization[] }) {
             <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {provincial.map((org) => (
-              <OrgCard key={org.id} org={org} live={LIVE_ORGS.includes(org.slug)} />
+            {provincial.map((org, i) => (
+              <div key={org.id} className="animate-slide-up" style={{ animationDelay: `${(i + 1) * 0.06}s`, animationFillMode: 'both' }}>
+                <OrgCard org={org} live={LIVE_ORGS.includes(org.slug)} />
+              </div>
             ))}
           </div>
         </div>
@@ -93,7 +110,10 @@ function OrgCard({ org, live, featured }: { org: Organization; live: boolean; fe
           {org.name}
         </p>
         {org.province && (
-          <p className="text-xs text-gray-400 mt-0.5">{org.province}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${PROVINCE_COLORS[org.province] || 'bg-gray-300'}`} />
+            <p className="text-xs text-gray-400">{org.province}</p>
+          </div>
         )}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">

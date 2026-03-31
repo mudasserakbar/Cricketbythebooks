@@ -12,6 +12,7 @@ import { FALLBACK_ORGS_BY_SLUG } from '@/lib/fallback-orgs'
 function AskContent() {
   const searchParams = useSearchParams()
   const orgSlug = searchParams.get('org')
+  const scenarioId = searchParams.get('scenario')
 
   const [org, setOrg] = useState<Organization | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -119,7 +120,7 @@ function AskContent() {
       {/* Quiz gate or Chat */}
       <div className="flex-1 overflow-hidden max-w-3xl mx-auto w-full">
         {verified ? (
-          <ChatInterface org={org} sessionId={sessionId!} />
+          <ChatInterface org={org} sessionId={sessionId!} scenarioId={scenarioId} />
         ) : (
           <CricketQuiz onVerified={() => setVerified(true)} />
         )}

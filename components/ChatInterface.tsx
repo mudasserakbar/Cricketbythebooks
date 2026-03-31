@@ -6,14 +6,42 @@ import { MessageBubble } from './MessageBubble'
 import { SoftProfileBanner } from './SoftProfileBanner'
 import { DocumentCoverage } from './DocumentCoverage'
 import { track } from '@/lib/track'
-import type { Organization, ChatMessage } from '@/lib/types'
+import { SCENARIOS } from '@/lib/scenarios'
+import type { Organization, ChatMessage, Citation } from '@/lib/types'
+
+const NOT_FOUND_MARKER = "This topic doesn't appear to be covered"
+
+function extractCitations(text: string): Citation[] {
+  const citations: Citation[] = []
+  const seen = new Set<string>()
+  const matches = Array.from(text.matchAll(/📄 Source: ([^,\n]+?)(?:,\s*([^\n📄]+))?(?:\n|$)/g))
+  for (const match of matches) {
+    const documentName = match[1]?.trim()
+    const sectionReference = match[2]?.trim() || undefined
+    if (!documentName) continue
+    const key = documentName + (sectionReference || '')
+    if (!seen.has(key)) {
+      seen.add(key)
+      citations.push({
+        documentName,
+        documentType: 'other',
+        sectionReference,
+        chunkContent: '',
+        chunkId: crypto.randomUUID(),
+      })
+    }
+  }
+  return citations
+}
 
 export function ChatInterface({
   org,
   sessionId,
+  scenarioId,
 }: {
   org: Organization
   sessionId: string
+  scenarioId?: string | null
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -30,6 +58,14 @@ export function ChatInterface({
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
+
+  // Pre-populate input from scenario
+  useEffect(() => {
+    if (scenarioId) {
+      const scenario = SCENARIOS.find((s) => s.id === scenarioId)
+      if (scenario) setInput(scenario.starterQuestion)
+    }
+  }, [scenarioId])
 
   const clearChat = () => {
     setMessages([])
@@ -53,9 +89,11 @@ export function ChatInterface({
     }
     setMessages((prev) => [...prev, userMsg])
 
+    const streamingId = crypto.randomUUID()
+
     try {
       const verificationToken = localStorage.getItem('cricket_verified') || ''
-      const res = await fetch('/api/ask', {
+      const res = await fetch('/api/ask-stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,38 +117,57 @@ export function ChatInterface({
         return
       }
 
-      const data = await res.json()
-
-      if (data.error && !data.answer) {
-        toast.error(data.error)
+      if (!res.ok || !res.body) {
         setMessages((prev) => [
           ...prev,
-          { id: crypto.randomUUID(), role: 'assistant', content: data.error, found: false },
+          { id: streamingId, role: 'assistant', content: '', found: false },
         ])
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: data.answer,
-            found: data.found,
-            citations: data.citations,
-          },
-        ])
+        setLoading(false)
+        return
       }
+
+      // Start streaming — hide typing indicator, show streaming bubble
+      setLoading(false)
+      setMessages((prev) => [...prev, { id: streamingId, role: 'assistant', content: '', isStreaming: true }])
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let accumulated = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        accumulated += decoder.decode(value, { stream: true })
+        setMessages((prev) =>
+          prev.map((m) => (m.id === streamingId ? { ...m, content: accumulated } : m))
+        )
+      }
+
+      const found = !accumulated.startsWith(NOT_FOUND_MARKER)
+      const citations = found ? extractCitations(accumulated) : []
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamingId ? { ...m, isStreaming: false, found, citations } : m
+        )
+      )
 
       questionCount.current += 1
       if (questionCount.current === 1) {
         setTimeout(() => setShowProfileBanner(true), 1500)
       }
     } catch {
-      toast.error('Connection error. Please try again.')
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: 'Sorry, something went wrong.', found: false },
-      ])
-    } finally {
+      setMessages((prev) => {
+        const hasPlaceholder = prev.some((m) => m.id === streamingId)
+        if (hasPlaceholder) {
+          return prev.map((m) =>
+            m.id === streamingId
+              ? { ...m, isStreaming: false, found: false, content: '' }
+              : m
+          )
+        }
+        return [...prev, { id: streamingId, role: 'assistant', content: '', found: false }]
+      })
       setLoading(false)
     }
   }
@@ -139,7 +196,9 @@ export function ChatInterface({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-        {messages.length === 0 && <WelcomeState orgName={org.name} onSuggest={setInput} />}
+        {messages.length === 0 && (
+          <WelcomeState orgName={org.name} scenarioId={scenarioId} onSuggest={setInput} />
+        )}
         {messages.map((msg, i) => (
           <div key={msg.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
             <MessageBubble message={msg} orgName={org.name} sessionId={sessionId} />
@@ -194,6 +253,45 @@ export function ChatInterface({
   )
 }
 
+const SCENARIO_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
+  suspension: [
+    { icon: '📋', text: 'What are the steps in the disciplinary process?' },
+    { icon: '⏱️', text: 'How long can a suspension last?' },
+    { icon: '🔄', text: 'Can I appeal a suspension and how?' },
+    { icon: '📞', text: 'Who do I contact if I believe a suspension is unfair?' },
+  ],
+  registration: [
+    { icon: '📝', text: 'What documents are required for player registration?' },
+    { icon: '🔁', text: 'How do I transfer registration between clubs?' },
+    { icon: '👶', text: 'What are the registration rules for youth players?' },
+    { icon: '⏳', text: 'What is the deadline to register each season?' },
+  ],
+  eligibility: [
+    { icon: '🏏', text: 'Can I play for two clubs in the same season?' },
+    { icon: '🌍', text: 'What are the residency requirements for provincial teams?' },
+    { icon: '🔄', text: 'How do I change my eligible organization?' },
+    { icon: '⚖️', text: 'What makes a player ineligible for selection?' },
+  ],
+  conduct: [
+    { icon: '📜', text: 'What behaviour counts as a code of conduct violation?' },
+    { icon: '🚫', text: 'What are the consequences for a conduct breach?' },
+    { icon: '👥', text: 'Does the code of conduct cover coaches and officials?' },
+    { icon: '📝', text: 'How do I report a conduct incident?' },
+  ],
+  rules: [
+    { icon: '🏏', text: 'What format rules apply to club matches?' },
+    { icon: '🌧️', text: 'What happens if a match is rained out?' },
+    { icon: '🧢', text: 'What are the equipment rules for players?' },
+    { icon: '🏆', text: 'How is a competition winner determined if matches are tied?' },
+  ],
+  complaint: [
+    { icon: '📝', text: 'How do I formally submit a complaint?' },
+    { icon: '⏱️', text: 'What is the time limit for filing a complaint?' },
+    { icon: '🔒', text: 'Is my complaint kept confidential?' },
+    { icon: '📊', text: 'What happens after I submit a complaint?' },
+  ],
+}
+
 const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
   'Cricket Canada': [
     { icon: '📜', text: 'What is the Cricket Canada Code of Conduct?' },
@@ -207,6 +305,12 @@ const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
     { icon: '🛡️', text: 'What does the child safeguarding policy cover?' },
     { icon: '🤝', text: 'What is the conflict of interest policy?' },
   ],
+  'Cricket Quebec': [
+    { icon: '📋', text: 'How do I register a player in Quebec?' },
+    { icon: '🔄', text: 'How does a player transfer between clubs work?' },
+    { icon: '🏏', text: 'What are the T20 playing conditions in Quebec?' },
+    { icon: '👶', text: 'What forms are needed for junior player registration?' },
+  ],
   default: [
     { icon: '📋', text: 'What are the registration requirements?' },
     { icon: '⚖️', text: 'How does the disciplinary process work?' },
@@ -217,14 +321,21 @@ const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
 
 function WelcomeState({
   orgName,
+  scenarioId,
   onSuggest,
 }: {
   orgName: string
+  scenarioId?: string | null
   onSuggest: (q: string) => void
 }) {
-  const suggestions = ORG_SUGGESTIONS[orgName] || ORG_SUGGESTIONS.default
+  const scenario = scenarioId ? SCENARIOS.find((s) => s.id === scenarioId) : null
+  const suggestions =
+    (scenarioId && SCENARIO_SUGGESTIONS[scenarioId]) ||
+    ORG_SUGGESTIONS[orgName] ||
+    ORG_SUGGESTIONS.default
+
   return (
-    <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 gap-8 animate-fade-in">
+    <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 gap-6 animate-fade-in">
       {/* Logo */}
       <div className="w-16 h-16 gradient-emerald rounded-2xl flex items-center justify-center shadow-glow">
         <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -233,14 +344,24 @@ function WelcomeState({
           <path d="M16 4.5c0 5-3 7.5-3 7.5s3 2.5 3 7.5" strokeLinecap="round" />
         </svg>
       </div>
+
       <div>
+        {scenario && (
+          <div className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1 mb-3">
+            <span>{scenario.emoji}</span>
+            <span>{scenario.title}</span>
+          </div>
+        )}
         <p className="text-lg font-semibold text-gray-900 mb-2">
-          Ask anything about {orgName}
+          {scenario ? `Let's find your answer` : `Ask anything about ${orgName}`}
         </p>
         <p className="text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
-          I&apos;ll find the answer in the official documents and cite exactly where it came from.
+          {scenario
+            ? `I'll search ${orgName}'s official documents and cite exactly where the answer comes from.`
+            : `I'll find the answer in the official documents and cite exactly where it came from.`}
         </p>
       </div>
+
       <div className="grid grid-cols-1 gap-2.5 w-full max-w-sm">
         {suggestions.map((s) => (
           <button
@@ -263,8 +384,8 @@ function TypingIndicator() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
-          style={{ animationDelay: `${i * 0.15}s` }}
+          className="w-2 h-2 bg-emerald-400 rounded-full animate-typing-dot"
+          style={{ animationDelay: `${i * 0.2}s` }}
         />
       ))}
     </div>

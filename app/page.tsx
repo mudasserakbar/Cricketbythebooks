@@ -1,5 +1,6 @@
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { OrgSelector } from '@/components/OrgSelector'
+import { ScenarioCards } from '@/components/ScenarioCards'
 import { TopQuestions } from '@/components/TopQuestions'
 import { PublicStats } from '@/components/PublicStats'
 import { PageTracker } from '@/components/PageTracker'
@@ -28,8 +29,16 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen gradient-hero">
+    <div className="min-h-screen gradient-hero relative overflow-hidden">
       <PageTracker page="/" />
+
+      {/* Floating background decorations */}
+      <div aria-hidden="true" className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-20 left-[8%] w-24 h-24 rounded-full border-2 border-emerald-100/40 animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute top-1/3 right-[6%] w-16 h-16 rounded-full border border-emerald-100/30 animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 left-[15%] w-10 h-10 rounded-full bg-emerald-50/60 animate-float" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-2/3 right-[20%] w-8 h-8 rounded-full border border-teal-100/30 animate-float" style={{ animationDelay: '1s' }} />
+      </div>
 
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-gray-100/50">
@@ -70,24 +79,33 @@ export default async function HomePage() {
 
       {/* Hero */}
       <main className="max-w-5xl mx-auto px-6">
-        <div className="pt-20 pb-16 text-center animate-fade-in">
+        <div className="pt-16 pb-6 text-center animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-medium px-4 py-1.5 rounded-full mb-6">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
             Free &middot; No login required &middot; Anonymous
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 tracking-tight leading-tight">
-            Get answers to your<br />
-            <span className="text-gradient">cricket policy questions</span>
+            Cricket rules got you<br />
+            <span className="text-gradient">confused?</span>
           </h1>
-          <p className="text-gray-500 text-lg max-w-2xl mx-auto leading-relaxed">
-            Select your organization and ask any question about rules,
-            registration, eligibility, or disciplinary policies.
-            Every answer cites the official source document.
+          <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
+            Tell us what&apos;s happening — we&apos;ll find the answer in the
+            official documents and cite exactly where it came from.
           </p>
         </div>
 
+        {/* Scenario cards */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.15s', animationFillMode: 'both' }}>
+          <ScenarioCards orgs={orgs} />
+        </div>
+
         {/* Org selector */}
-        <div className="animate-slide-up">
+        <div className="mt-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <p className="text-xs text-gray-400 font-medium whitespace-nowrap">or choose your organization directly</p>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          </div>
           <OrgSelector orgs={orgs} />
         </div>
 

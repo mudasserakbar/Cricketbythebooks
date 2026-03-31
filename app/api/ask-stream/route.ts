@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const { data: chunks } = await supabase.rpc('match_chunks', {
       query_embedding: queryEmbedding,
       match_org_id: orgId,
-      match_threshold: 0.72,
+      match_threshold: 0.3,
       match_count: 6,
     })
 

@@ -29,6 +29,9 @@ export function MessageBubble({
     <div className="flex flex-col gap-2.5 max-w-[90%]">
       <div className="bg-white text-gray-800 text-sm px-4 py-3.5 rounded-2xl rounded-tl-md leading-relaxed whitespace-pre-wrap shadow-soft border border-gray-100/80">
         {message.content}
+        {message.isStreaming && (
+          <span className="inline-block w-0.5 h-4 bg-gray-400 ml-0.5 animate-pulse align-middle" />
+        )}
       </div>
       {message.found && message.citations && message.citations.length > 0 && (
         <CitationCard citations={message.citations} />

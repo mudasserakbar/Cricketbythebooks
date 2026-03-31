@@ -97,4 +97,5 @@ export interface ChatMessage {
   content: string
   found?: boolean
   citations?: Citation[]
+  isStreaming?: boolean
 }
