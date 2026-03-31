@@ -15,17 +15,28 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
     throw new Error('VOYAGE_API_KEY is not set')
   }
 
-  const res = await fetch('https://api.voyageai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'voyage-3',
-      input: texts,
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 25000)
+
+  let res: Response
+  try {
+    res = await fetch('https://api.voyageai.com/v1/embeddings', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'voyage-3',
+        input: texts,
+      }),
+      signal: controller.signal,
+    })
+  } catch (err: any) {
+    throw new Error(`Voyage fetch failed: ${err?.message || err}`)
+  } finally {
+    clearTimeout(timeout)
+  }
 
   if (!res.ok) {
     const err = await res.text()
