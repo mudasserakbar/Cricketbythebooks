@@ -119,7 +119,7 @@ export default async function HomePage() {
             <span className="w-1 h-1 bg-gray-300 rounded-full" />
             <span>Document-grounded</span>
             <span className="w-1 h-1 bg-gray-300 rounded-full" />
-            <span>Not legal advice</span>
+            <a href="/disclaimer" className="hover:text-emerald-600 transition-colors">Not legal advice</a>
           </div>
           <PublicStats />
         </div>

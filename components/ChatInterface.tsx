@@ -246,7 +246,10 @@ export function ChatInterface({
           </button>
         </div>
         <p className="text-[11px] text-gray-400 mt-2.5 text-center">
-          Answers cite official documents only &middot; Not legal advice
+          Answers cite official documents only &middot;{' '}
+          <a href="/disclaimer" className="hover:text-emerald-600 transition-colors underline underline-offset-2">
+            Not legal advice
+          </a>
         </p>
       </div>
     </div>
