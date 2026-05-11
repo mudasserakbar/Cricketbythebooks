@@ -197,11 +197,11 @@ export function ChatInterface({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
         {messages.length === 0 && (
-          <WelcomeState orgName={org.name} scenarioId={scenarioId} onSuggest={setInput} />
+          <WelcomeState orgName={org.name} orgSlug={org.slug} scenarioId={scenarioId} onSuggest={setInput} />
         )}
         {messages.map((msg, i) => (
           <div key={msg.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
-            <MessageBubble message={msg} orgName={org.name} sessionId={sessionId} />
+            <MessageBubble message={msg} orgName={org.name} orgSlug={org.slug} sessionId={sessionId} />
           </div>
         ))}
         {loading && <TypingIndicator />}
@@ -297,10 +297,10 @@ const SCENARIO_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
 
 const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
   'Cricket Canada': [
-    { icon: '📜', text: 'What is the Cricket Canada Code of Conduct?' },
-    { icon: '⚖️', text: 'How do I file a discipline complaint?' },
-    { icon: '🏏', text: 'What is the player selection policy for national teams?' },
-    { icon: '🚫', text: 'What counts as disapproved cricket?' },
+    { icon: '🚨', text: 'How does Cricket Canada handle match-fixing or corruption allegations?' },
+    { icon: '🛡️', text: 'How do I report harassment or maltreatment in cricket?' },
+    { icon: '🏏', text: 'How are national team players selected — what is the selection policy?' },
+    { icon: '📜', text: 'What changed in the new 2026 Cricket Canada bylaws?' },
   ],
   'Cricket BC': [
     { icon: '📋', text: 'How are provincial teams selected?' },
@@ -324,10 +324,12 @@ const ORG_SUGGESTIONS: Record<string, { icon: string; text: string }[]> = {
 
 function WelcomeState({
   orgName,
+  orgSlug,
   scenarioId,
   onSuggest,
 }: {
   orgName: string
+  orgSlug?: string
   scenarioId?: string | null
   onSuggest: (q: string) => void
 }) {
@@ -336,6 +338,7 @@ function WelcomeState({
     (scenarioId && SCENARIO_SUGGESTIONS[scenarioId]) ||
     ORG_SUGGESTIONS[orgName] ||
     ORG_SUGGESTIONS.default
+  const showNewsLink = orgSlug === 'cricket-canada'
 
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 py-12 gap-6 animate-fade-in">
@@ -377,6 +380,21 @@ function WelcomeState({
           </button>
         ))}
       </div>
+
+      {showNewsLink && (
+        <a
+          href="https://www.cricketcanada.org/news"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-emerald-600 transition-colors group"
+        >
+          <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+          <span className="group-hover:underline underline-offset-2">Latest from Cricket Canada</span>
+          <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      )}
     </div>
   )
 }

@@ -77,10 +77,12 @@ function ListenButton({ text }: { text: string }) {
 export function MessageBubble({
   message,
   orgName,
+  orgSlug,
   sessionId,
 }: {
   message: ChatMessage
   orgName: string
+  orgSlug?: string
   sessionId?: string
 }) {
   if (message.role === 'user') {
@@ -105,7 +107,7 @@ export function MessageBubble({
         <CitationCard citations={message.citations} />
       )}
       {message.found === false && (
-        <NotFoundCard orgName={orgName} />
+        <NotFoundCard orgName={orgName} orgSlug={orgSlug} />
       )}
       <div className="flex items-center gap-2">
         {sessionId && (

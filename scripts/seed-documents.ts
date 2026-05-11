@@ -72,6 +72,11 @@ const ORG_CONFIGS: OrgConfig[] = [
       '2_17.CC-POL-017-Travel-Policy-3 (1).pdf',
     ],
     catalog: {
+      'Cricket-Canada-bylaws-approved-May-2026.pdf': {
+        name: 'Cricket Canada By-Laws (Approved May 2026)',
+        type: 'bylaws',
+        version: '2026',
+      },
       'Cricket-Canada-bylaws-approved-MAy-11-2025.pdf': {
         name: 'Cricket Canada By-Laws (Approved May 2025)',
         type: 'bylaws',
